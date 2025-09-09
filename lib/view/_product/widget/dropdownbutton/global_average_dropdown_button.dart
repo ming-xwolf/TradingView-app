@@ -3,10 +3,17 @@ import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/extension/context_extension.dart';
 import 'package:tradingview_app/product/init/locale/project_keys.dart';
 
-class GlobalAverageDropdownButton extends StatelessWidget {
+class GlobalAverageDropdownButton extends StatefulWidget {
   const GlobalAverageDropdownButton({
     super.key,
   });
+
+  @override
+  State<GlobalAverageDropdownButton> createState() => _GlobalAverageDropdownButtonState();
+}
+
+class _GlobalAverageDropdownButtonState extends State<GlobalAverageDropdownButton> {
+  String _selected = ProjectKeys.globalAverage;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +28,7 @@ class GlobalAverageDropdownButton extends StatelessWidget {
           child: DropdownButton(
             isDense: true,
             padding: EdgeInsets.zero,
-            value: ProjectKeys.globalAverage,
+            value: _selected,
             iconEnabledColor: ProjectColors.white,
             borderRadius: context.mediumCircular,
             style: context.poonMediumTheme,
@@ -35,7 +42,13 @@ class GlobalAverageDropdownButton extends StatelessWidget {
                 child: Text(ProjectKeys.appName),
               )
             ],
-            onChanged: (value) {},
+            onChanged: (value) {
+              if (value is String) {
+                setState(() {
+                  _selected = value;
+                });
+              }
+            },
           ),
         ),
       ),

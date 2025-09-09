@@ -1,6 +1,7 @@
 class CryptoNameDataSource {
   static String binanceSourceEuro(String cryptoName) {
-    return 'BINANCE:${cryptoName}EUR';
+    // TradingView 符号需大写，且 USDT 交易对覆盖面更广
+    return 'BINANCE:${cryptoName.toUpperCase()}USDT';
   }
 
   static String cryptoNameAndSource(String name) {

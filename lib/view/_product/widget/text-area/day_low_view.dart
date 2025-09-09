@@ -15,7 +15,7 @@ class DayLowView extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomMultiTextArea(
       title: ProjectKeys.twentyFourHourLowEuro,
-      description: crypto.quote?.uSD?.percentChange30d?.toStringAsFixed(2) ?? ProjectKeys.notFound,
+      description: crypto.quote?.uSD?.low24h?.toStringAsFixed(2) ?? ProjectKeys.notFound,
     );
   }
 }

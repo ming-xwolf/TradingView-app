@@ -15,8 +15,9 @@ class CryptoDataSourceWithDio extends ICryptoDataSource {
 
   @override
   Future<List<Crypto>> fetchData() async {
-    final response = await dio.get<Map<String, dynamic>>(url, options: Options(headers: header));
-    final json = response.data?['data'] as List;
-    return json.map((e) => Crypto.fromJson(e as Map<String, dynamic>)).toList();
+    // CoinGecko 直接返回数组而非 { data: [...] }
+    final response = await dio.get<List<dynamic>>(url, options: Options(headers: header));
+    final jsonList = response.data ?? <dynamic>[];
+    return jsonList.map((e) => Crypto.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

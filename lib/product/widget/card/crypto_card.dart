@@ -23,9 +23,11 @@ class CryptoCard extends StatelessWidget {
           );
         },
         child: ListTile(
-          leading: CryptoIcon(url: crypto.id.toString()),
+          leading: crypto.image != null
+              ? CircleAvatar(backgroundImage: NetworkImage(crypto.image!))
+              : CryptoIcon(url: crypto.id.toString()),
           title: BodyLargeText(text: crypto.name.toString()),
-          trailing: BodyLargeText(text: '${crypto.quote!.uSD!.price!.toStringAsFixed(2)} \$'),
+          trailing: BodyLargeText(text: '${(crypto.quote?.uSD?.price ?? 0).toStringAsFixed(2)} \$'),
         ),
       ),
     );

@@ -2,10 +2,10 @@ import 'package:tradingview_app/view/_product/service/service_keys.dart';
 
 class ApiConstants {
   const ApiConstants._();
+  // 使用免费的CoinGecko API替代CoinMarketCap
   static const String url =
-      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=99&convert=USD';
+      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
   static final Map<String, String> header = {
-    'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': ServiceKeys.coinMarketApiKey,
+    'Accept': 'application/json',
   };
 }

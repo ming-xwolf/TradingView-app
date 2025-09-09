@@ -15,7 +15,7 @@ class CirculationView extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomMultiTextArea(
       title: ProjectKeys.circulation(crypto.symbol.toString()),
-      description: crypto.quote?.uSD?.marketCapDominance?.toStringAsFixed(2) ?? ProjectKeys.notFound,
+      description: crypto.quote?.uSD?.marketCap?.toStringAsFixed(2) ?? ProjectKeys.notFound,
     );
   }
 }
