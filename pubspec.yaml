@@ -31,6 +31,9 @@ dependencies:
   # webviewer
   webview_flutter: ^4.2.2
 
+  # local storage
+  shared_preferences: ^2.2.2
+
 dev_dependencies:
   # linter
   flutter_lints: ^2.0.0

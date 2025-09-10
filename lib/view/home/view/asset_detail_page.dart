@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/component/chart/tradingview_chart_widget.dart';
+import 'package:tradingview_app/core/component/chart/enhanced_tradingview_chart_widget.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
 
 class AssetDetailPage extends StatefulWidget {
@@ -294,12 +295,13 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
       return _buildUnsupportedIntervalMessage();
     }
     
-    return TradingViewChartWidget(
+    return EnhancedTradingViewChartWidget(
       symbol: widget.asset.symbol,
       timeframe: _selectedInterval,
       category: widget.asset.category.value,
       height: 300,
       theme: 'dark',
+      enableDiaryMarkers: true,
     );
   }
 
