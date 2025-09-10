@@ -5,8 +5,8 @@ class KlineDiary {
   final String id;
   final String symbol;
   final String category;
-  final DateTime timestamp;
-  final double price;
+  final DateTime timestamp; // 日记创建时间
+  final DateTime klineTime; // K线时间
   final String content;
   final Color markerColor;
   final DateTime createdAt;
@@ -17,7 +17,7 @@ class KlineDiary {
     required this.symbol,
     required this.category,
     required this.timestamp,
-    required this.price,
+    required this.klineTime,
     required this.content,
     this.markerColor = const Color(0xFF388EFF),
     required this.createdAt,
@@ -31,7 +31,7 @@ class KlineDiary {
       symbol: json['symbol'] as String,
       category: json['category'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
-      price: (json['price'] as num).toDouble(),
+      klineTime: DateTime.parse(json['klineTime'] as String),
       content: json['content'] as String,
       markerColor: Color(json['markerColor'] as int),
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -46,7 +46,7 @@ class KlineDiary {
       'symbol': symbol,
       'category': category,
       'timestamp': timestamp.toIso8601String(),
-      'price': price,
+      'klineTime': klineTime.toIso8601String(),
       'content': content,
       'markerColor': markerColor.value,
       'createdAt': createdAt.toIso8601String(),
@@ -60,7 +60,7 @@ class KlineDiary {
     String? symbol,
     String? category,
     DateTime? timestamp,
-    double? price,
+    DateTime? klineTime,
     String? content,
     Color? markerColor,
     DateTime? createdAt,
@@ -71,7 +71,7 @@ class KlineDiary {
       symbol: symbol ?? this.symbol,
       category: category ?? this.category,
       timestamp: timestamp ?? this.timestamp,
-      price: price ?? this.price,
+      klineTime: klineTime ?? this.klineTime,
       content: content ?? this.content,
       markerColor: markerColor ?? this.markerColor,
       createdAt: createdAt ?? this.createdAt,
@@ -81,7 +81,7 @@ class KlineDiary {
 
   @override
   String toString() {
-    return 'KlineDiary(id: $id, symbol: $symbol, timestamp: $timestamp, price: $price, content: $content)';
+    return 'KlineDiary(id: $id, symbol: $symbol, timestamp: $timestamp, content: $content)';
   }
 
   @override
@@ -99,12 +99,10 @@ class DiaryMarkerPosition {
   final double x;
   final double y;
   final DateTime timestamp;
-  final double price;
 
   DiaryMarkerPosition({
     required this.x,
     required this.y,
     required this.timestamp,
-    required this.price,
   });
 }

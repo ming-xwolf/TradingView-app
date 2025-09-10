@@ -198,9 +198,8 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
     final screenWidth = MediaQuery.of(context).size.width;
     final x = (diaryTimeOffset / timeRange) * screenWidth;
     
-    final priceRange = maxPrice - minPrice;
-    final priceOffset = diary.price - minPrice;
-    final y = widget.height - (priceOffset / priceRange) * widget.height;
+    // 将标记放在图表中间位置，不依赖价格
+    final y = widget.height * 0.5;
     
     return Positioned(
       left: x - 30,
@@ -335,14 +334,13 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
     // 显示触觉反馈
     // HapticFeedback.mediumImpact();
     
-    // 计算点击位置对应的时间和价格
-    final timestamp = _calculateTimestampFromPosition(details.localPosition);
-    final price = _calculatePriceFromPosition(details.localPosition);
+    // 计算点击位置对应的K线时间
+    final klineTime = _calculateKlineTimeFromPosition(details.localPosition);
     
-    print('计算出的时间: $timestamp, 价格: $price');
+    print('计算出的K线时间: $klineTime');
     
     // 查找该位置是否已有日记记录
-    final existingDiary = _findDiaryAtPosition(timestamp, price);
+    final existingDiary = _findDiaryAtPosition(klineTime);
     
     if (existingDiary != null) {
       print('找到现有日记记录: ${existingDiary.id}');
@@ -355,17 +353,16 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
     }
   }
 
-  /// 根据时间和价格查找现有的日记记录
-  KlineDiary? _findDiaryAtPosition(DateTime timestamp, double price) {
-    // 设置一个时间容差（±5分钟）和价格容差（±1%）
-    final timeTolerance = const Duration(minutes: 5);
-    final priceTolerance = price * 0.01; // 1%的价格容差
+  /// 根据K线时间查找现有的日记记录
+  KlineDiary? _findDiaryAtPosition(DateTime klineTime) {
+    // 主要基于K线时间判断，设置时间容差（±10分钟）
+    final timeTolerance = const Duration(minutes: 10);
     
     for (final diary in _diaries) {
-      final timeDiff = diary.timestamp.difference(timestamp).abs();
-      final priceDiff = (diary.price - price).abs();
+      final timeDiff = diary.klineTime.difference(klineTime).abs();
       
-      if (timeDiff <= timeTolerance && priceDiff <= priceTolerance) {
+      // 只基于K线时间判断
+      if (timeDiff <= timeTolerance) {
         return diary;
       }
     }
@@ -402,7 +399,7 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
           symbol: widget.symbol,
           category: widget.category,
           timestamp: existingDiary.timestamp,
-          price: existingDiary.price,
+          klineTime: existingDiary.klineTime,
           existingDiary: existingDiary,
         ),
       ).then((result) {
@@ -415,9 +412,9 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
         }
       });
     } else if (position != null) {
-      // 添加新日记 - 根据点击位置计算时间和价格
+      // 添加新日记 - 根据点击位置计算时间
       final timestamp = _calculateTimestampFromPosition(position);
-      final price = _calculatePriceFromPosition(position);
+      final klineTime = _calculateKlineTimeFromPosition(position);
       
       showDialog(
         context: context,
@@ -425,7 +422,7 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
           symbol: widget.symbol,
           category: widget.category,
           timestamp: timestamp,
-          price: price,
+          klineTime: klineTime,
           existingDiary: null,
         ),
       ).then((result) {
@@ -476,24 +473,51 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
     return startTime.add(Duration(milliseconds: timeOffset.round()));
   }
 
-  /// 根据点击位置计算对应的价格
-  double _calculatePriceFromPosition(Offset position) {
-    final priceRange = _getPriceRangeForAsset();
-    final minPrice = priceRange['min']!;
-    final maxPrice = priceRange['max']!;
+  /// 根据点击位置计算对应的K线时间
+  DateTime _calculateKlineTimeFromPosition(Offset position) {
+    // 获取当前时间范围（根据时间间隔调整）
+    final now = DateTime.now();
+    Duration timeRange;
     
-    // 根据Y坐标计算价格
-    final screenHeight = widget.height;
-    final yRatio = position.dy / screenHeight;
+    switch (widget.timeframe) {
+      case '1m':
+        timeRange = const Duration(hours: 1); // 1分钟图显示1小时
+        break;
+      case '30m':
+        timeRange = const Duration(hours: 12); // 30分钟图显示12小时
+        break;
+      case '1h':
+        timeRange = const Duration(days: 1); // 1小时图显示1天
+        break;
+      case 'D':
+        timeRange = const Duration(days: 30); // 日线图显示30天
+        break;
+      case 'W':
+        timeRange = const Duration(days: 180); // 周线图显示6个月
+        break;
+      case 'M':
+        timeRange = const Duration(days: 365); // 月线图显示1年
+        break;
+      default:
+        timeRange = const Duration(days: 1);
+    }
     
-    // Y坐标越小，价格越高（图表是倒置的）
-    final priceRangeValue = maxPrice - minPrice;
-    final priceOffset = priceRangeValue * (1 - yRatio);
-    return minPrice + priceOffset;
+    final startTime = now.subtract(timeRange);
+    final endTime = now;
+    
+    // 根据X坐标计算时间
+    final screenWidth = MediaQuery.of(context).size.width;
+    final xRatio = position.dx / screenWidth;
+    final timeOffset = timeRange.inMilliseconds * xRatio;
+    
+    return startTime.add(Duration(milliseconds: timeOffset.round()));
   }
 
   Future<void> _saveDiary(KlineDiary diary) async {
     try {
+      // 在保存新日记之前，先删除同一位置的旧日记
+      await _removeDiariesAtSamePosition(diary);
+      
       final success = await DiaryService.instance.saveDiary(diary);
       if (success) {
         await _loadDiaries();
@@ -525,6 +549,26 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
           ),
         );
       }
+    }
+  }
+
+  /// 删除同一位置的旧日记记录
+  Future<void> _removeDiariesAtSamePosition(KlineDiary newDiary) async {
+    // 主要基于K线时间判断，设置时间容差（±10分钟）
+    final timeTolerance = const Duration(minutes: 10);
+    
+    // 查找同一位置的旧日记
+    final diariesToRemove = _diaries.where((diary) {
+      final timeDiff = diary.klineTime.difference(newDiary.klineTime).abs();
+      
+      // 只基于K线时间判断
+      return timeDiff <= timeTolerance;
+    }).toList();
+    
+    // 删除找到的旧日记
+    for (final diary in diariesToRemove) {
+      await DiaryService.instance.deleteDiary(diary.id);
+      print('删除同一位置的旧日记: ${diary.id}');
     }
   }
 

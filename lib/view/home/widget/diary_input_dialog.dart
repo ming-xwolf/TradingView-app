@@ -7,14 +7,14 @@ class DiaryInputDialog extends StatefulWidget {
   final String symbol;
   final String category;
   final DateTime timestamp;
-  final double price;
+  final DateTime klineTime; // K线时间
   final KlineDiary? existingDiary; // 编辑现有日记时传入
 
   const DiaryInputDialog({
     required this.symbol,
     required this.category,
     required this.timestamp,
-    required this.price,
+    required this.klineTime,
     this.existingDiary,
     super.key,
   });
@@ -140,7 +140,7 @@ class _DiaryInputDialogState extends State<DiaryInputDialog> {
           ),
           const SizedBox(width: 8),
           Text(
-            '${widget.symbol} • ${widget.price.toStringAsFixed(2)}',
+            '${widget.symbol} • ${_formatTimestamp(widget.klineTime)}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -328,7 +328,7 @@ class _DiaryInputDialogState extends State<DiaryInputDialog> {
       symbol: widget.symbol,
       category: widget.category,
       timestamp: widget.timestamp,
-      price: widget.price,
+      klineTime: widget.klineTime,
       content: content,
       markerColor: _selectedColor,
       createdAt: DateTime.now(),
@@ -369,5 +369,9 @@ class _DiaryInputDialogState extends State<DiaryInputDialog> {
         ],
       ),
     );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    return '${timestamp.month}/${timestamp.day} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 }

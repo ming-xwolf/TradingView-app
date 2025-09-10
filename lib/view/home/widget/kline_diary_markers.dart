@@ -83,16 +83,13 @@ class DiaryMarkersPainter extends CustomPainter {
     
     final x = (diaryTimeOffset / timeRange) * size.width;
     
-    // 计算价格在图表中的Y位置
-    final priceRange = maxPrice - minPrice;
-    final priceOffset = diary.price - minPrice;
-    final y = size.height - (priceOffset / priceRange) * size.height;
+    // 将标记放在图表中间位置，不依赖价格
+    final y = size.height * 0.5;
     
     return DiaryMarkerPosition(
       x: x,
       y: y,
       timestamp: diary.timestamp,
-      price: diary.price,
     );
   }
 
@@ -276,15 +273,13 @@ class _InteractiveDiaryMarkersState extends State<InteractiveDiaryMarkers> {
     }
     
     final x = (diaryTimeOffset / timeRange) * widget.chartWidth;
-    final priceRange = widget.maxPrice - widget.minPrice;
-    final priceOffset = diary.price - widget.minPrice;
-    final y = widget.chartHeight - (priceOffset / priceRange) * widget.chartHeight;
+    // 将标记放在图表中间位置，不依赖价格
+    final y = widget.chartHeight * 0.5;
     
     return DiaryMarkerPosition(
       x: x,
       y: y,
       timestamp: diary.timestamp,
-      price: diary.price,
     );
   }
 
@@ -307,7 +302,7 @@ class _InteractiveDiaryMarkersState extends State<InteractiveDiaryMarkers> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${diary.symbol} • ${diary.price.toStringAsFixed(2)}',
+              '${diary.symbol} • ${_formatTimestamp(diary.timestamp)}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -328,5 +323,9 @@ class _InteractiveDiaryMarkersState extends State<InteractiveDiaryMarkers> {
         ),
       ),
     );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    return '${timestamp.month}/${timestamp.day} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 }

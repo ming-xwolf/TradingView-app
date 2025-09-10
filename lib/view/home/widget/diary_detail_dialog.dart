@@ -299,7 +299,7 @@ class _DiaryDetailDialogState extends State<DiaryDetailDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '记录价格',
+                  'K线时间',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 12,
@@ -307,7 +307,7 @@ class _DiaryDetailDialogState extends State<DiaryDetailDialog> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.diary.price.toStringAsFixed(2),
+                  _formatTimestamp(widget.diary.klineTime),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -600,5 +600,9 @@ class _DiaryDetailDialogState extends State<DiaryDetailDialog> {
         ],
       ),
     );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    return '${timestamp.month}/${timestamp.day} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 }

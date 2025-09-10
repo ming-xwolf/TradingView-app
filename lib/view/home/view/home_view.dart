@@ -74,10 +74,16 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildAssetList(CryptoCompleted data) {
-    // 将加密货币数据转换为AssetItem
-    final cryptoAssets = data.response
+    // 将加密货币数据转换为AssetItem，只显示BTCUSD和其他两个
+    final allCryptoAssets = data.response
         .map((crypto) => AssetItem.fromCrypto(crypto as Crypto))
         .toList();
+    
+    // 筛选出BTCUSD和其他两个加密货币
+    final cryptoAssets = allCryptoAssets.where((asset) {
+      final symbol = asset.symbol.toUpperCase();
+      return symbol == 'BTC' || symbol == 'ETH' || symbol == 'BNB';
+    }).toList();
 
     // 创建示例外汇数据
     final forexAssets = [
