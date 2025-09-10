@@ -25,21 +25,23 @@ class TradingTabViews extends StatelessWidget {
           Column(
             children: [
               TradingViewWidgetChart(crypto: crypto),
-              const MediumFullWidthDivider(),
+              const SizedBox(height: 16),
+              // 简化的价格信息
               Padding(
-                padding: context.halfVerticalSmallPad,
-                child: Column(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        PriceInfo(crypto: crypto),
-                        const GlobalAverageDropdownButton(),
-                      ],
-                    ),
-                    TradingViewCryptoInfoInBottom(crypto: crypto),
+                    PriceInfo(crypto: crypto),
+                    const GlobalAverageDropdownButton(),
                   ],
                 ),
+              ),
+              const SizedBox(height: 12),
+              // 简化的底部信息
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TradingViewCryptoInfoInBottom(crypto: crypto),
               ),
             ],
           ),

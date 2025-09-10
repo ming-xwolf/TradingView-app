@@ -18,29 +18,25 @@ class TradingViewCryptoInfoInBottom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        context.smallHeightSize,
-        Row(
-          children: [
-            DayHighView(crypto: crypto),
-            const Spacer(),
-            DayLowView(crypto: crypto),
-            const Spacer(),
-            DayVolView(crypto: crypto),
-          ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: ProjectColors.cardBackground,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: ProjectColors.borderColor,
+          width: 0.5,
         ),
-        context.smallHeightSize,
-        Row(
-          children: [
-            CapView(crypto: crypto),
-            const Spacer(),
-            CirculationView(crypto: crypto),
-            const Spacer(),
-            const CustomMultiTextSize(),
-          ],
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // 只显示关键数据，移除重复的成交量
+          DayHighView(crypto: crypto),
+          DayLowView(crypto: crypto),
+          CapView(crypto: crypto),
+        ],
+      ),
     );
   }
 }
