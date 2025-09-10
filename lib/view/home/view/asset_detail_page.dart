@@ -17,10 +17,46 @@ class AssetDetailPage extends StatefulWidget {
 
 class _AssetDetailPageState extends State<AssetDetailPage> {
   int _selectedTab = 0; // 默认选择概览
-  String _selectedInterval = '1h'; // 默认选择1小时
+  late String _selectedInterval; // 根据资产类型动态设置默认时间间隔
   int _selectedChartType = 0; // 0: K线图, 1: 折线图
 
-  final List<String> _intervals = ['1m', '30m', '1h', 'D'];
+  @override
+  void initState() {
+    super.initState();
+    _selectedInterval = _getDefaultInterval();
+  }
+
+  String _getDefaultInterval() {
+    // 根据资产类型设置默认时间间隔
+    switch (widget.asset.category) {
+      case AssetCategory.stock:
+        return 'D'; // 股票默认日线
+      case AssetCategory.crypto:
+        return '1h'; // 加密货币默认1小时
+      case AssetCategory.forex:
+        return '1h'; // 外汇默认1小时
+      case AssetCategory.commodity:
+        return 'D'; // 商品默认日线
+      default:
+        return '1h';
+    }
+  }
+
+  List<String> get _intervals {
+    // 根据资产类型返回不同的时间间隔选项
+    switch (widget.asset.category) {
+      case AssetCategory.stock:
+        return ['D', 'W', 'M']; // 股票只支持日线、周线、月线
+      case AssetCategory.crypto:
+        return ['1m', '30m', '1h', 'D']; // 加密货币支持分钟级
+      case AssetCategory.forex:
+        return ['1m', '30m', '1h', 'D']; // 外汇支持分钟级
+      case AssetCategory.commodity:
+        return ['1h', 'D', 'W', 'M']; // 商品支持小时级及以上
+      default:
+        return ['1m', '30m', '1h', 'D'];
+    }
+  }
 
   final List<String> _tabs = [
     '概览', '新闻', '看法', '观点'
@@ -244,18 +280,91 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
                 bottomLeft: Radius.circular(8),
                 bottomRight: Radius.circular(8),
               ),
-              child: TradingViewChartWidget(
-                symbol: widget.asset.symbol,
-                timeframe: _selectedInterval,
-                category: widget.asset.category.value,
-                height: 300,
-                theme: 'dark',
-              ),
+              child: _buildChartContent(),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildChartContent() {
+    // 检查是否支持当前选择的时间间隔
+    if (!_isIntervalSupported(_selectedInterval)) {
+      return _buildUnsupportedIntervalMessage();
+    }
+    
+    return TradingViewChartWidget(
+      symbol: widget.asset.symbol,
+      timeframe: _selectedInterval,
+      category: widget.asset.category.value,
+      height: 300,
+      theme: 'dark',
+    );
+  }
+
+  bool _isIntervalSupported(String interval) {
+    return _intervals.contains(interval);
+  }
+
+  Widget _buildUnsupportedIntervalMessage() {
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: ProjectColors.manatee,
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '不支持的时间间隔',
+            style: TextStyle(
+              color: ProjectColors.manatee,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _getUnsupportedIntervalMessage(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ProjectColors.manatee.withOpacity(0.7),
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _selectedInterval = _intervals.first; // 选择第一个支持的时间间隔
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ProjectColors.pictonBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: Text('切换到 ${_intervals.first}'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getUnsupportedIntervalMessage() {
+    switch (widget.asset.category) {
+      case AssetCategory.stock:
+        return '股票数据仅支持日线(D)、周线(W)、月线(M)时间间隔';
+      case AssetCategory.commodity:
+        return '商品数据仅支持小时线(1h)、日线(D)、周线(W)、月线(M)时间间隔';
+      default:
+        return '当前时间间隔不支持，请选择其他选项';
+    }
   }
 
   Widget _buildChartControls() {

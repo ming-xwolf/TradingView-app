@@ -76,6 +76,10 @@ class TradingViewHtmlService {
         return '60';
       case 'D':
         return '1D';
+      case 'W':
+        return '1W';
+      case 'M':
+        return '1M';
       case '1日':
         return '1D';
       case '5日':
