@@ -22,7 +22,7 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       backgroundColor: ProjectColors.haiti,
       appBar: CustomAppBar(
-        title: 'TradingView',
+        title: '投资日记',
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),

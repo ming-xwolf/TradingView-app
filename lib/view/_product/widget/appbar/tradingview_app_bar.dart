@@ -15,7 +15,7 @@ class TradingAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: const AppBarBackIconButton(),
       title: Column(
         children: [
-          const TitleMediumText(text: 'TradingView'),
+          const TitleMediumText(text: '投资日记'),
           const LabelSmallText(text: ProjectKeys.globalAverage),
         ],
       ),
