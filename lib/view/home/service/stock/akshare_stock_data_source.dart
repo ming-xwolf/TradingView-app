@@ -734,6 +734,114 @@ class AkshareStockDataSource extends IStockDataSource {
     }
   }
 
+  // 统一解析 klines 为蜡烛点集合，兼容 String/List/Map 三种形式
+  List<CandlestickSpot> _parseKlinesToSpots(List<dynamic> klines) {
+    final List<CandlestickSpot> spots = [];
+    for (int i = 0; i < klines.length; i++) {
+      final kline = klines[i];
+      double? open;
+      double? close;
+      double? high;
+      double? low;
+
+      if (kline is String) {
+        final parts = kline.split(',');
+        if (parts.length >= 5) {
+          open = double.tryParse(parts[1]);
+          close = double.tryParse(parts[2]);
+          high = double.tryParse(parts[3]);
+          low = double.tryParse(parts[4]);
+        }
+      } else if (kline is List) {
+        if (kline.length >= 5) {
+          open = double.tryParse(kline[1].toString());
+          close = double.tryParse(kline[2].toString());
+          high = double.tryParse(kline[3].toString());
+          low = double.tryParse(kline[4].toString());
+        }
+      } else if (kline is Map) {
+        open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
+        close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
+        high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
+        low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
+      }
+
+      if (open != null && close != null && high != null && low != null) {
+        spots.add(CandlestickSpot(
+          x: i.toDouble(),
+          open: open,
+          high: high,
+          low: low,
+          close: close,
+        ));
+      }
+    }
+    return spots;
+  }
+
+  // 尝试主接口，失败后回退到历史接口
+  Future<List<dynamic>> _fetchRawKlinesWithFallback({
+    required String symbol,
+    required String klt,
+    required int limit,
+  }) async {
+    // 主接口
+    try {
+      final resp = await dio.get(
+        'https://push2.eastmoney.com/api/qt/stock/kline/get',
+        queryParameters: {
+          'secid': _getSecId(symbol),
+          'ut': 'bd1d9ddb0408970cf38c7f7fda6ba90b',
+          'fields1': 'f1,f2,f3,f4,f5,f6',
+          'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58',
+          'klt': klt,
+          'fqt': '1',
+          'lmt': limit.toString(),
+        },
+      );
+      if (resp.statusCode == 200 && resp.data is Map) {
+        final map = resp.data as Map;
+        final rc = map['rc'];
+        final data = map['data'];
+        if (rc == 0 && data is Map && data['klines'] is List) {
+          return (data['klines'] as List).cast<dynamic>();
+        }
+      }
+      print('Primary kline API failed or empty, fallback to history API');
+    } catch (e) {
+      print('Primary kline API error: $e');
+    }
+
+    // 备用历史接口（按日期范围获取）
+    try {
+      final resp2 = await dio.get(
+        'https://push2his.eastmoney.com/api/qt/stock/kline/get',
+        queryParameters: {
+          'secid': _getSecId(symbol),
+          'ut': 'bd1d9ddb0408970cf38c7f7fda6ba90b',
+          'fields1': 'f1,f2,f3,f4,f5,f6',
+          'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58',
+          'klt': klt,
+          'fqt': '1',
+          'beg': '19900101',
+          'end': '20500101',
+          'lmt': limit.toString(),
+        },
+      );
+      if (resp2.statusCode == 200 && resp2.data is Map) {
+        final map = resp2.data as Map;
+        final data = map['data'];
+        if (data is Map && data['klines'] is List) {
+          return (data['klines'] as List).cast<dynamic>();
+        }
+      }
+    } catch (e) {
+      print('History kline API error: $e');
+    }
+
+    return <dynamic>[];
+  }
+
   // 获取日线数据
   Future<List<CandlestickSpot>> fetchDailyData(String symbol, int days) async {
     try {
@@ -761,66 +869,23 @@ class AkshareStockDataSource extends IStockDataSource {
           return [];
         }
         // rc != 0 或 data 为空直接返回
-        final rc = data is Map<String, dynamic> ? data['rc'] : null;
+        final bool dataIsMap = data is Map;
+        final rc = dataIsMap ? (data as Map)['rc'] : null;
         if (rc != null && rc != 0) {
           print('Daily data rc=$rc, returning empty');
           return [];
         }
-        if (data != null && data['data'] != null && data['data'] is Map) {
-          final klineData = data['data'] as Map;
-          final klines = klineData['klines'];
-          print('Daily klines type: ${klines.runtimeType}');
-          if (klines is! List) {
-            print('Unexpected daily klines type: ${klines.runtimeType}');
-            return [];
-          }
-          
-          if (klines is List) {
-            List<CandlestickSpot> spots = [];
-
-            for (int i = 0; i < klines.length; i++) {
-              final kline = klines[i];
-              double? open;
-              double? close;
-              double? high;
-              double? low;
-
-              if (kline is String) {
-                final parts = kline.split(',');
-                if (parts.length >= 5) {
-                  open = double.tryParse(parts[1]);
-                  close = double.tryParse(parts[2]);
-                  high = double.tryParse(parts[3]);
-                  low = double.tryParse(parts[4]);
-                }
-              } else if (kline is List) {
-                if (kline.length >= 5) {
-                  open = double.tryParse(kline[1].toString());
-                  close = double.tryParse(kline[2].toString());
-                  high = double.tryParse(kline[3].toString());
-                  low = double.tryParse(kline[4].toString());
-                }
-              } else if (kline is Map) {
-                open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
-                close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
-                high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
-                low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
-              }
-
-              if (open != null && close != null && high != null && low != null) {
-                spots.add(CandlestickSpot(
-                  x: i.toDouble(),
-                  open: open,
-                  high: high,
-                  low: low,
-                  close: close,
-                ));
-              }
-            }
-            // 不足lmt时直接返回
-            print('Fetched ${spots.length} daily data points for $symbol');
-            return spots;
-          }
+        if (dataIsMap && (data as Map)['data'] is Map && ((data as Map)['data'] as Map)['klines'] is List) {
+          final klines = (((data as Map)['data'] as Map)['klines'] as List).cast<dynamic>();
+          final spots = _parseKlinesToSpots(klines);
+          print('Fetched ${spots.length} daily data points for $symbol');
+          return spots;
+        } else {
+          // 回退到历史接口
+          final klines = await _fetchRawKlinesWithFallback(symbol: symbol, klt: '101', limit: days);
+          final spots = _parseKlinesToSpots(klines);
+          print('Fetched ${spots.length} daily data points for $symbol (fallback)');
+          return spots;
         }
       }
       
@@ -855,65 +920,22 @@ class AkshareStockDataSource extends IStockDataSource {
         if (data == null) {
           return [];
         }
-        final rc = data is Map<String, dynamic> ? data['rc'] : null;
+        final bool dataIsMap = data is Map;
+        final rc = dataIsMap ? (data as Map)['rc'] : null;
         if (rc != null && rc != 0) {
           print('Weekly data rc=$rc, returning empty');
           return [];
         }
-        if (data != null && data['data'] != null && data['data'] is Map) {
-          final klineData = data['data'] as Map;
-          final klines = klineData['klines'];
-          print('Weekly klines type: ${klines.runtimeType}');
-          if (klines is! List) {
-            print('Unexpected weekly klines type: ${klines.runtimeType}');
-            return [];
-          }
-          
-          if (klines is List) {
-            List<CandlestickSpot> spots = [];
-
-            for (int i = 0; i < klines.length; i++) {
-              final kline = klines[i];
-              double? open;
-              double? close;
-              double? high;
-              double? low;
-
-              if (kline is String) {
-                final parts = kline.split(',');
-                if (parts.length >= 5) {
-                  open = double.tryParse(parts[1]);
-                  close = double.tryParse(parts[2]);
-                  high = double.tryParse(parts[3]);
-                  low = double.tryParse(parts[4]);
-                }
-              } else if (kline is List) {
-                if (kline.length >= 5) {
-                  open = double.tryParse(kline[1].toString());
-                  close = double.tryParse(kline[2].toString());
-                  high = double.tryParse(kline[3].toString());
-                  low = double.tryParse(kline[4].toString());
-                }
-              } else if (kline is Map) {
-                open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
-                close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
-                high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
-                low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
-              }
-
-              if (open != null && close != null && high != null && low != null) {
-                spots.add(CandlestickSpot(
-                  x: i.toDouble(),
-                  open: open,
-                  high: high,
-                  low: low,
-                  close: close,
-                ));
-              }
-            }
-            print('Fetched ${spots.length} weekly data points for $symbol');
-            return spots;
-          }
+        if (dataIsMap && (data as Map)['data'] is Map && ((data as Map)['data'] as Map)['klines'] is List) {
+          final klines = (((data as Map)['data'] as Map)['klines'] as List).cast<dynamic>();
+          final spots = _parseKlinesToSpots(klines);
+          print('Fetched ${spots.length} weekly data points for $symbol');
+          return spots;
+        } else {
+          final klines = await _fetchRawKlinesWithFallback(symbol: symbol, klt: '102', limit: weeks);
+          final spots = _parseKlinesToSpots(klines);
+          print('Fetched ${spots.length} weekly data points for $symbol (fallback)');
+          return spots;
         }
       }
       
@@ -948,65 +970,22 @@ class AkshareStockDataSource extends IStockDataSource {
         if (data == null) {
           return [];
         }
-        final rc = data is Map<String, dynamic> ? data['rc'] : null;
+        final bool dataIsMap = data is Map;
+        final rc = dataIsMap ? (data as Map)['rc'] : null;
         if (rc != null && rc != 0) {
           print('Monthly data rc=$rc, returning empty');
           return [];
         }
-        if (data != null && data['data'] != null && data['data'] is Map) {
-          final klineData = data['data'] as Map;
-          final klines = klineData['klines'];
-          print('Monthly klines type: ${klines.runtimeType}');
-          if (klines is! List) {
-            print('Unexpected monthly klines type: ${klines.runtimeType}');
-            return [];
-          }
-          
-          if (klines is List) {
-            List<CandlestickSpot> spots = [];
-
-            for (int i = 0; i < klines.length; i++) {
-              final kline = klines[i];
-              double? open;
-              double? close;
-              double? high;
-              double? low;
-
-              if (kline is String) {
-                final parts = kline.split(',');
-                if (parts.length >= 5) {
-                  open = double.tryParse(parts[1]);
-                  close = double.tryParse(parts[2]);
-                  high = double.tryParse(parts[3]);
-                  low = double.tryParse(parts[4]);
-                }
-              } else if (kline is List) {
-                if (kline.length >= 5) {
-                  open = double.tryParse(kline[1].toString());
-                  close = double.tryParse(kline[2].toString());
-                  high = double.tryParse(kline[3].toString());
-                  low = double.tryParse(kline[4].toString());
-                }
-              } else if (kline is Map) {
-                open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
-                close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
-                high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
-                low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
-              }
-
-              if (open != null && close != null && high != null && low != null) {
-                spots.add(CandlestickSpot(
-                  x: i.toDouble(),
-                  open: open,
-                  high: high,
-                  low: low,
-                  close: close,
-                ));
-              }
-            }
-            print('Fetched ${spots.length} monthly data points for $symbol');
-            return spots;
-          }
+        if (dataIsMap && (data as Map)['data'] is Map && ((data as Map)['data'] as Map)['klines'] is List) {
+          final klines = (((data as Map)['data'] as Map)['klines'] as List).cast<dynamic>();
+          final spots = _parseKlinesToSpots(klines);
+          print('Fetched ${spots.length} monthly data points for $symbol');
+          return spots;
+        } else {
+          final klines = await _fetchRawKlinesWithFallback(symbol: symbol, klt: '103', limit: months);
+          final spots = _parseKlinesToSpots(klines);
+          print('Fetched ${spots.length} monthly data points for $symbol (fallback)');
+          return spots;
         }
       }
       
