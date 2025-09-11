@@ -27,6 +27,11 @@ class _CandlestickChartWidgetState extends State<CandlestickChartWidget> {
   String? _errorMessage;
   String _selectedPeriod = '分时';
 
+  // 默认展示的K线根数（便于阅读）
+  static const int _defaultDailyBars = 90;   // 约4-5个月
+  static const int _defaultWeeklyBars = 60;  // 约一年多
+  static const int _defaultMonthlyBars = 60; // 约5年
+
   @override
   void initState() {
     super.initState();
@@ -77,16 +82,16 @@ class _CandlestickChartWidgetState extends State<CandlestickChartWidget> {
           spots = await _fetchIntradayData();
           break;
         case 'D':
-          // 取最近120根日K（约半年的交易日）
-          spots = await _fetchDailyData(120);
+          // 取最近若干根日K
+          spots = await _fetchDailyData(_defaultDailyBars);
           break;
         case 'W':
-          // 取最近120根周K（约两年多）
-          spots = await _fetchWeeklyData(120);
+          // 取最近若干根周K
+          spots = await _fetchWeeklyData(_defaultWeeklyBars);
           break;
         case 'M':
-          // 取最近120根月K（约十年）
-          spots = await _fetchMonthlyData(120);
+          // 取最近若干根月K
+          spots = await _fetchMonthlyData(_defaultMonthlyBars);
           break;
         default:
           spots = await _fetchIntradayData();
