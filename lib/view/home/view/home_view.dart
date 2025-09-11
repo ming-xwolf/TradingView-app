@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tradingview_app/core/enum/base_status.dart';
 import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/component/navigation/bottom_navigation_bar.dart';
 import 'package:tradingview_app/core/component/app_bar/custom_app_bar.dart';
 import 'package:tradingview_app/core/component/list/category_asset_list.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
 import 'package:tradingview_app/view/home/view/add_asset_page.dart';
 import 'package:tradingview_app/view/home/view/test_tushare_page.dart';
-import 'package:tradingview_app/view/home/view-model/cubit/crypto_cubit.dart';
-import 'package:tradingview_app/view/home/view-model/cubit/crypto_state.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -67,20 +62,7 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-      body: BlocBuilder<CryptoCubit, CryptoState>(
-        builder: (context, state) {
-          switch (state.status) {
-            case BaseStatus.initial:
-              return const SizedBox.shrink();
-            case BaseStatus.loading:
-              return const Center(child: CircularProgressIndicator());
-            case BaseStatus.completed:
-              return _buildAssetList(state as CryptoCompleted);
-            case BaseStatus.error:
-              return const Center(child: Text('加载失败'));
-          }
-        },
-      ),
+      body: _buildAssetList(),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -92,18 +74,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildAssetList(CryptoCompleted data) {
-    // 将加密货币数据转换为AssetItem，只显示BTCUSD和其他两个
-    final allCryptoAssets = data.response
-        .map((crypto) => AssetItem.fromCrypto(crypto as Crypto))
-        .toList();
-    
-    // 筛选出BTCUSD和其他两个加密货币
-    final cryptoAssets = allCryptoAssets.where((asset) {
-      final symbol = asset.symbol.toUpperCase();
-      return symbol == 'BTC' || symbol == 'ETH' || symbol == 'BNB';
-    }).toList();
-
+  Widget _buildAssetList() {
     // 创建示例外汇数据
     final forexAssets = [
       AssetItem.forex(
@@ -163,10 +134,6 @@ class _HomeViewState extends State<HomeView> {
           CategoryAssetList(
             category: AssetCategory.forex,
             assets: forexAssets,
-          ),
-          CategoryAssetList(
-            category: AssetCategory.crypto,
-            assets: cryptoAssets,
           ),
           CategoryAssetList(
             category: AssetCategory.stock,

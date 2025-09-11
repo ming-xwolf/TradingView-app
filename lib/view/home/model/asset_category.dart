@@ -1,11 +1,9 @@
-import 'package:tradingview_app/view/home/model/crypto.dart';
 import 'package:tradingview_app/view/home/model/forex.dart';
 import 'package:tradingview_app/view/home/model/stock.dart';
 import 'package:tradingview_app/view/home/model/commodity.dart';
 
 enum AssetCategory {
   forex('外汇', 'forex'),
-  crypto('加密货币', 'crypto'),
   stock('股票', 'stock'),
   commodity('商品', 'commodity');
 
@@ -36,22 +34,6 @@ class AssetItem {
     required this.category,
   }) : isPositive = change >= 0;
 
-  factory AssetItem.fromCrypto(Crypto crypto) {
-    final price = (crypto.quote?.uSD?.price ?? 0.0).toDouble();
-    final changePercent = (crypto.quote?.uSD?.percentChange24h ?? 0.0).toDouble();
-    final change = price * (changePercent / 100);
-    
-    return AssetItem(
-      symbol: crypto.symbol?.toUpperCase() ?? '',
-      name: '${crypto.symbol?.toUpperCase()}USD',
-      subtitle: '${crypto.name} / 美元',
-      currentPrice: price,
-      change: change,
-      changePercent: changePercent,
-      iconUrl: crypto.image ?? '',
-      category: AssetCategory.crypto,
-    );
-  }
 
   factory AssetItem.forex({
     required String symbol,

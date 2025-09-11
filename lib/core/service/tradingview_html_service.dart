@@ -103,8 +103,8 @@ class TradingViewHtmlService {
 
   static String getSymbolForAsset(String symbol, String category) {
     switch (category) {
-      case 'crypto':
-        return 'BINANCE:${symbol.toUpperCase()}USDT';
+      case 'commodity':
+        return 'COMEX:${symbol.toUpperCase()}';
       case 'forex':
         return 'FX:${symbol.toUpperCase()}';
       case 'stock':

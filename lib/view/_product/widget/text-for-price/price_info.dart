@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tradingview_app/core/component/text/label_small_text_manatee.dart';
 import 'package:tradingview_app/product/init/locale/project_keys.dart';
-import 'package:tradingview_app/view/_product/widget/text/day_percent_change_price.dart';
-import 'package:tradingview_app/view/_product/widget/text/eur_text_colored.dart';
-import 'package:tradingview_app/view/_product/widget/text/euro_price_colored.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
 
 class PriceInfo extends StatelessWidget {
-  const PriceInfo({
-    required this.crypto,
-    super.key,
-  });
-
-  final Crypto crypto;
+  const PriceInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +13,14 @@ class PriceInfo extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            EurPriceColored(crypto: crypto),
-            EurTextColored(crypto: crypto),
+            const Text('价格信息', style: TextStyle(color: Colors.white, fontSize: 18)),
+            const Text('USD', style: TextStyle(color: Colors.grey, fontSize: 14)),
           ],
         ),
         Row(
           children: [
-            LabelSmallTextManatee(text: '= ${crypto.quote?.uSD?.price?.toStringAsFixed(2)} ${ProjectKeys.usd} '),
-            DayPercentChangeColored(crypto: crypto),
+            const LabelSmallTextManatee(text: '= 0.00 USD '),
+            const Text('+0.00%', style: TextStyle(color: Colors.green, fontSize: 12)),
           ],
         ),
       ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/extension/context_extension.dart';
 import 'package:tradingview_app/product/init/locale/project_keys.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
+// import 'package:tradingview_app/view/home/model/crypto.dart'; // 已移除加密货币支持
 
 class TechinalsScreen extends StatelessWidget {
   const TechinalsScreen({

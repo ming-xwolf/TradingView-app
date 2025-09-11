@@ -299,14 +299,8 @@ class _EnhancedTradingViewChartWidgetState extends State<EnhancedTradingViewChar
   /// 根据资产类型获取价格范围
   Map<String, double> _getPriceRangeForAsset() {
     switch (widget.category) {
-      case 'crypto':
-        if (widget.symbol.toUpperCase().contains('BTC')) {
-          return {'min': 90000.0, 'max': 120000.0};
-        } else if (widget.symbol.toUpperCase().contains('ETH')) {
-          return {'min': 2500.0, 'max': 3500.0};
-        } else {
-          return {'min': 0.5, 'max': 1.5};
-        }
+      case 'commodity':
+        return {'min': 0.0, 'max': 2000.0};
       case 'stock':
         return {'min': 100.0, 'max': 200.0};
       case 'forex':

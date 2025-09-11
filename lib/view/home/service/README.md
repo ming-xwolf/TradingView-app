@@ -1,30 +1,26 @@
 # 资产数据源架构
 
-本项目为不同的资产类别（加密货币、外汇、股票、商品）创建了独立的数据源，便于扩展和维护。
+本项目为不同的资产类别（外汇、股票、商品）创建了独立的数据源，便于扩展和维护。
 
 ## 架构设计
 
 ### 1. 数据模型 (Models)
-- `crypto.dart` - 加密货币数据模型
 - `forex.dart` - 外汇数据模型  
 - `stock.dart` - 股票数据模型
 - `commodity.dart` - 商品数据模型
 
 ### 2. 数据源接口 (Data Source Interfaces)
-- `ICryptoDataSource` - 加密货币数据源接口
 - `IForexDataSource` - 外汇数据源接口
 - `IStockDataSource` - 股票数据源接口
 - `ICommodityDataSource` - 商品数据源接口
 
 ### 3. 数据源实现 (Data Source Implementations)
-- `CryptoDataSourceWithDio` - 加密货币数据源实现 (CoinGecko API)
 - `ForexDataSourceWithDio` - 外汇数据源实现 (模拟数据)
 - `StockDataSourceWithDio` - 股票数据源实现 (模拟数据)
 - `TushareStockDataSource` - Tushare股票数据源实现 (真实A股数据)
 - `CommodityDataSourceWithDio` - 商品数据源实现 (模拟数据)
 
 ### 4. 状态管理 (State Management)
-- `CryptoCubit` / `CryptoState` - 加密货币状态管理
 - `ForexCubit` / `ForexState` - 外汇状态管理
 - `StockCubit` / `StockState` - 股票状态管理
 - `CommodityCubit` / `CommodityState` - 商品状态管理
@@ -54,7 +50,6 @@ await stockCubit.fetchStockData();
 ### 3. 使用统一管理器
 ```dart
 final assetManager = AssetDataManager(
-  cryptoDataSource: GetItSource.getIt<CryptoDataSourceWithDio>(),
   forexDataSource: GetItSource.getIt<ForexDataSourceWithDio>(),
   stockDataSource: GetItSource.getIt<StockDataSourceWithDio>(),
   commodityDataSource: GetItSource.getIt<CommodityDataSourceWithDio>(),

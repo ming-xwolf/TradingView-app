@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
 import 'package:tradingview_app/view/home/model/forex.dart';
 import 'package:tradingview_app/view/home/model/stock.dart';
 import 'package:tradingview_app/view/home/model/commodity.dart';
-import 'package:tradingview_app/view/home/service/crypto/icrypto_data_source.dart';
 import 'package:tradingview_app/view/home/service/forex/iforex_data_source.dart';
 import 'package:tradingview_app/view/home/service/stock/istock_data_source.dart';
 import 'package:tradingview_app/view/home/service/stock/tushare_stock_data_source.dart';
@@ -12,28 +10,21 @@ import 'package:tradingview_app/view/home/service/commodity/icommodity_data_sour
 
 /// 资产管理器 - 统一管理所有资产类别的数据源
 class AssetDataManager {
-  final ICryptoDataSource _cryptoDataSource;
   final IForexDataSource _forexDataSource;
   final IStockDataSource _stockDataSource;
   final ICommodityDataSource _commodityDataSource;
 
   AssetDataManager({
-    required ICryptoDataSource cryptoDataSource,
     required IForexDataSource forexDataSource,
     required IStockDataSource stockDataSource,
     required ICommodityDataSource commodityDataSource,
-  }) : _cryptoDataSource = cryptoDataSource,
-       _forexDataSource = forexDataSource,
+  }) : _forexDataSource = forexDataSource,
        _stockDataSource = stockDataSource,
        _commodityDataSource = commodityDataSource;
 
   /// 获取指定类别的所有资产
   Future<List<AssetItem>> getAllAssetsByCategory(AssetCategory category) async {
     switch (category) {
-      case AssetCategory.crypto:
-        final cryptoList = await _cryptoDataSource.fetchData();
-        return cryptoList.map((crypto) => AssetItem.fromCrypto(crypto)).toList();
-      
       case AssetCategory.forex:
         final forexList = await _forexDataSource.fetchData();
         return forexList.map((forex) => AssetItem.fromForex(forex)).toList();
@@ -62,11 +53,6 @@ class AssetDataManager {
   /// 根据符号搜索资产
   Future<AssetItem?> searchAssetBySymbol(String symbol, AssetCategory category) async {
     switch (category) {
-      case AssetCategory.crypto:
-        final cryptoList = await _cryptoDataSource.fetchData();
-        final crypto = cryptoList.where((c) => c.symbol?.toUpperCase() == symbol.toUpperCase()).firstOrNull;
-        return crypto != null ? AssetItem.fromCrypto(crypto) : null;
-      
       case AssetCategory.forex:
         final forex = await _forexDataSource.fetchForexBySymbol(symbol);
         return forex != null ? AssetItem.fromForex(forex) : null;

@@ -37,8 +37,6 @@ class AssetIcon extends StatelessWidget {
     switch (asset.category) {
       case AssetCategory.forex:
         return _buildForexIcon();
-      case AssetCategory.crypto:
-        return _buildCryptoIcon();
       case AssetCategory.stock:
         return _buildStockIcon();
       case AssetCategory.commodity:
@@ -66,38 +64,6 @@ class AssetIcon extends StatelessWidget {
     );
   }
 
-  Widget _buildCryptoIcon() {
-    if (asset.symbol.contains('BTC')) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.orange,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.currency_bitcoin,
-          color: Colors.white,
-          size: 20,
-        ),
-      );
-    } else if (asset.symbol.contains('ETH')) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.diamond,
-          color: Colors.white,
-          size: 20,
-        ),
-      );
-    }
-    return Icon(
-      Icons.currency_bitcoin,
-      color: Colors.white,
-      size: 20,
-    );
-  }
 
   Widget _buildStockIcon() {
     return Icon(
@@ -133,8 +99,6 @@ class AssetIcon extends StatelessWidget {
     switch (asset.category) {
       case AssetCategory.forex:
         return ProjectColors.pictonBlue;
-      case AssetCategory.crypto:
-        return Colors.orange;
       case AssetCategory.stock:
         return ProjectColors.dolly;
       case AssetCategory.commodity:

@@ -4,16 +4,14 @@ import 'package:tradingview_app/view/_product/tabbar/trading_tab_views.dart';
 import 'package:tradingview_app/view/_product/tabbar/trading_tabbar_constants.dart';
 import 'package:tradingview_app/view/_product/tabbar/trading_view_tabbars.dart';
 import 'package:tradingview_app/view/_product/widget/appbar/tradingview_app_bar.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
 
 class TradingView extends StatelessWidget {
-  const TradingView({required this.crypto, super.key});
-  final Crypto crypto;
+  const TradingView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TradingAppBar(crypto: crypto),
+      appBar: const TradingAppBar(),
       body: DefaultTabController(
         length: TabbarConstants.tabbarItems.length,
         child: SizedBox(
@@ -22,7 +20,7 @@ class TradingView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const TradingviewTabbars(),
-              TradingTabViews(crypto: crypto),
+              const TradingTabViews(),
             ],
           ),
         ),

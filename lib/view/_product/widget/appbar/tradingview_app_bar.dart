@@ -5,14 +5,9 @@ import 'package:tradingview_app/core/component/iconbutton/apppbar_notification_i
 import 'package:tradingview_app/core/component/text/label_small_text.dart';
 import 'package:tradingview_app/core/component/text/title_medium_text.dart';
 import 'package:tradingview_app/product/init/locale/project_keys.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
 
 class TradingAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const TradingAppBar({
-    required this.crypto,
-    super.key,
-  });
-  final Crypto crypto;
+  const TradingAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +15,7 @@ class TradingAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: const AppBarBackIconButton(),
       title: Column(
         children: [
-          TitleMediumText(text: crypto.symbol.toString()),
+          const TitleMediumText(text: 'TradingView'),
           const LabelSmallText(text: ProjectKeys.globalAverage),
         ],
       ),

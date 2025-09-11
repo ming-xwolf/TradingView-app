@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/component/icon/asset_icon.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
-import 'package:tradingview_app/view/home/model/crypto.dart';
 import 'package:tradingview_app/view/home/service/stock/stock_data_source_selector.dart';
 import 'package:tradingview_app/view/home/service/asset_data_manager.dart';
 import 'package:tradingview_app/view/home/widget/datasource_selector_dialog.dart';
@@ -136,31 +135,6 @@ class _AddAssetPageState extends State<AddAssetPage> {
         changePercent: 0.12,
         iconUrl: '',
       ),
-      // 加密货币
-      AssetItem.fromCrypto(Crypto(
-        id: 'bitcoin',
-        name: 'Bitcoin',
-        symbol: 'BTC',
-        image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-        quote: Quote(
-          uSD: USD(
-            price: 111012,
-            percentChange24h: -0.47,
-          ),
-        ),
-      )),
-      AssetItem.fromCrypto(Crypto(
-        id: 'ethereum',
-        name: 'Ethereum',
-        symbol: 'ETH',
-        image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-        quote: Quote(
-          uSD: USD(
-            price: 4308.9,
-            percentChange24h: -0.03,
-          ),
-        ),
-      )),
     ];
   }
 

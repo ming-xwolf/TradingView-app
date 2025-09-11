@@ -33,17 +33,13 @@ class _AssetDetailChartState extends State<AssetDetailChart> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: TradingViewWidgetHtml(
-          cryptoName: _getTradingViewSymbol(),
-        ),
+        child: const TradingViewWidgetHtml(),
       ),
     );
   }
 
   String _getTradingViewSymbol() {
     switch (widget.asset.category) {
-      case AssetCategory.crypto:
-        return 'BINANCE:${widget.asset.symbol.toUpperCase()}USDT';
       case AssetCategory.forex:
         return 'FX:${widget.asset.symbol.toUpperCase()}';
       case AssetCategory.stock:

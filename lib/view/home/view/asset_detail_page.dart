@@ -32,8 +32,6 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     switch (widget.asset.category) {
       case AssetCategory.stock:
         return 'D'; // 股票默认日线
-      case AssetCategory.crypto:
-        return '1h'; // 加密货币默认1小时
       case AssetCategory.forex:
         return '1h'; // 外汇默认1小时
       case AssetCategory.commodity:
@@ -48,8 +46,6 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     switch (widget.asset.category) {
       case AssetCategory.stock:
         return ['D', 'W', 'M']; // 股票只支持日线、周线、月线
-      case AssetCategory.crypto:
-        return ['1m', '30m', '1h', 'D']; // 加密货币支持分钟级
       case AssetCategory.forex:
         return ['1m', '30m', '1h', 'D']; // 外汇支持分钟级
       case AssetCategory.commodity:
@@ -848,8 +844,6 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     switch (widget.asset.category) {
       case AssetCategory.stock:
         return 'Kweichow Moutai Co., Ltd.';
-      case AssetCategory.crypto:
-        return '${widget.asset.name} / 美元';
       case AssetCategory.forex:
         return '${widget.asset.name} / 美元';
       case AssetCategory.commodity:
@@ -861,8 +855,6 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     switch (widget.asset.category) {
       case AssetCategory.stock:
         return 'SSE';
-      case AssetCategory.crypto:
-        return 'Crypto';
       case AssetCategory.forex:
         return 'Forex';
       case AssetCategory.commodity:
@@ -874,8 +866,6 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     switch (widget.asset.category) {
       case AssetCategory.stock:
         return ProjectColors.dolly;
-      case AssetCategory.crypto:
-        return Colors.orange;
       case AssetCategory.forex:
         return ProjectColors.pictonBlue;
       case AssetCategory.commodity:
@@ -887,8 +877,6 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
     switch (widget.asset.category) {
       case AssetCategory.stock:
         return 'MOUTAI';
-      case AssetCategory.crypto:
-        return widget.asset.symbol.substring(0, 2);
       case AssetCategory.forex:
         return widget.asset.symbol.substring(0, 3);
       case AssetCategory.commodity:

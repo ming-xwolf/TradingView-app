@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:tradingview_app/view/home/service/crypto/crypto_data_soure_with_dio.dart';
 import 'package:tradingview_app/view/home/service/forex/forex_data_source_with_dio.dart';
 import 'package:tradingview_app/view/home/service/stock/stock_data_source_with_dio.dart';
 import 'package:tradingview_app/view/home/service/stock/tushare_stock_data_source.dart';
@@ -20,9 +19,6 @@ class GetItSource {
   static final dio = Dio();
 
   static void setup() {
-    // 注册加密货币数据源
-    getIt.registerSingleton<CryptoDataSourceWithDio>(CryptoDataSourceWithDio(dio: dio));
-    
     // 注册外汇数据源
     getIt.registerSingleton<ForexDataSourceWithDio>(ForexDataSourceWithDio(dio: dio));
     

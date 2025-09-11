@@ -39,15 +39,15 @@ class TushareUsageExample {
       
       // 4. 使用AssetDataManager
       print('\n=== 使用AssetDataManager ===');
-      final assetManager = AssetDataManager(
-        cryptoDataSource: null, // 这里需要实际的依赖注入
-        forexDataSource: null,
-        stockDataSource: tushareDataSource,
-        commodityDataSource: null,
-      );
+      // AssetDataManager需要所有必需的数据源，这里暂时跳过
+      // final assetManager = AssetDataManager(
+      //   forexDataSource: null, // 需要实际的外汇数据源
+      //   stockDataSource: tushareDataSource,
+      //   commodityDataSource: null, // 需要实际的商品数据源
+      // );
       
-      final tushareAssets = await assetManager.getTushareStocks();
-      print('通过AssetDataManager获取到 ${tushareAssets.length} 个资产');
+      // final tushareAssets = await assetManager.getTushareStocks();
+      // print('通过AssetDataManager获取到 ${tushareAssets.length} 个资产');
       
     } catch (e) {
       print('获取数据时出错: $e');
