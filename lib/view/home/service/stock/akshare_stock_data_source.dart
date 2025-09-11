@@ -755,23 +755,50 @@ class AkshareStockDataSource extends IStockDataSource {
       );
 
       if (response.statusCode == 200) {
+        print('Daily data response: ${response.data}');
         final data = response.data;
         if (data != null && data['data'] != null) {
           final klineData = data['data'];
           final klines = klineData['klines'];
+          print('Daily klines type: ${klines.runtimeType}');
+          if (klines is! List) {
+            print('Unexpected daily klines type: ${klines.runtimeType}');
+            return [];
+          }
           
           if (klines is List) {
             List<CandlestickSpot> spots = [];
 
             for (int i = 0; i < klines.length; i++) {
               final kline = klines[i];
-              final parts = kline.toString().split(',');
-              if (parts.length >= 5) {
-                final open = double.tryParse(parts[1]) ?? 0.0;
-                final close = double.tryParse(parts[2]) ?? 0.0;
-                final high = double.tryParse(parts[3]) ?? 0.0;
-                final low = double.tryParse(parts[4]) ?? 0.0;
+              double? open;
+              double? close;
+              double? high;
+              double? low;
 
+              if (kline is String) {
+                final parts = kline.split(',');
+                if (parts.length >= 5) {
+                  open = double.tryParse(parts[1]);
+                  close = double.tryParse(parts[2]);
+                  high = double.tryParse(parts[3]);
+                  low = double.tryParse(parts[4]);
+                }
+              } else if (kline is List) {
+                if (kline.length >= 5) {
+                  open = double.tryParse(kline[1].toString());
+                  close = double.tryParse(kline[2].toString());
+                  high = double.tryParse(kline[3].toString());
+                  low = double.tryParse(kline[4].toString());
+                }
+              } else if (kline is Map) {
+                open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
+                close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
+                high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
+                low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
+              }
+
+              if (open != null && close != null && high != null && low != null) {
                 spots.add(CandlestickSpot(
                   x: i.toDouble(),
                   open: open,
@@ -819,19 +846,45 @@ class AkshareStockDataSource extends IStockDataSource {
         if (data != null && data['data'] != null) {
           final klineData = data['data'];
           final klines = klineData['klines'];
+          print('Weekly klines type: ${klines.runtimeType}');
+          if (klines is! List) {
+            print('Unexpected weekly klines type: ${klines.runtimeType}');
+            return [];
+          }
           
           if (klines is List) {
             List<CandlestickSpot> spots = [];
 
             for (int i = 0; i < klines.length; i++) {
               final kline = klines[i];
-              final parts = kline.toString().split(',');
-              if (parts.length >= 5) {
-                final open = double.tryParse(parts[1]) ?? 0.0;
-                final close = double.tryParse(parts[2]) ?? 0.0;
-                final high = double.tryParse(parts[3]) ?? 0.0;
-                final low = double.tryParse(parts[4]) ?? 0.0;
+              double? open;
+              double? close;
+              double? high;
+              double? low;
 
+              if (kline is String) {
+                final parts = kline.split(',');
+                if (parts.length >= 5) {
+                  open = double.tryParse(parts[1]);
+                  close = double.tryParse(parts[2]);
+                  high = double.tryParse(parts[3]);
+                  low = double.tryParse(parts[4]);
+                }
+              } else if (kline is List) {
+                if (kline.length >= 5) {
+                  open = double.tryParse(kline[1].toString());
+                  close = double.tryParse(kline[2].toString());
+                  high = double.tryParse(kline[3].toString());
+                  low = double.tryParse(kline[4].toString());
+                }
+              } else if (kline is Map) {
+                open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
+                close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
+                high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
+                low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
+              }
+
+              if (open != null && close != null && high != null && low != null) {
                 spots.add(CandlestickSpot(
                   x: i.toDouble(),
                   open: open,
@@ -878,19 +931,45 @@ class AkshareStockDataSource extends IStockDataSource {
         if (data != null && data['data'] != null) {
           final klineData = data['data'];
           final klines = klineData['klines'];
+          print('Monthly klines type: ${klines.runtimeType}');
+          if (klines is! List) {
+            print('Unexpected monthly klines type: ${klines.runtimeType}');
+            return [];
+          }
           
           if (klines is List) {
             List<CandlestickSpot> spots = [];
 
             for (int i = 0; i < klines.length; i++) {
               final kline = klines[i];
-              final parts = kline.toString().split(',');
-              if (parts.length >= 5) {
-                final open = double.tryParse(parts[1]) ?? 0.0;
-                final close = double.tryParse(parts[2]) ?? 0.0;
-                final high = double.tryParse(parts[3]) ?? 0.0;
-                final low = double.tryParse(parts[4]) ?? 0.0;
+              double? open;
+              double? close;
+              double? high;
+              double? low;
 
+              if (kline is String) {
+                final parts = kline.split(',');
+                if (parts.length >= 5) {
+                  open = double.tryParse(parts[1]);
+                  close = double.tryParse(parts[2]);
+                  high = double.tryParse(parts[3]);
+                  low = double.tryParse(parts[4]);
+                }
+              } else if (kline is List) {
+                if (kline.length >= 5) {
+                  open = double.tryParse(kline[1].toString());
+                  close = double.tryParse(kline[2].toString());
+                  high = double.tryParse(kline[3].toString());
+                  low = double.tryParse(kline[4].toString());
+                }
+              } else if (kline is Map) {
+                open = double.tryParse((kline['open'] ?? kline['1'])?.toString() ?? '');
+                close = double.tryParse((kline['close'] ?? kline['2'])?.toString() ?? '');
+                high = double.tryParse((kline['high'] ?? kline['3'])?.toString() ?? '');
+                low = double.tryParse((kline['low'] ?? kline['4'])?.toString() ?? '');
+              }
+
+              if (open != null && close != null && high != null && low != null) {
                 spots.add(CandlestickSpot(
                   x: i.toDouble(),
                   open: open,
