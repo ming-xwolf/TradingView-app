@@ -35,4 +35,8 @@ class ProjectColors {
   static Color get borderColor => const Color.fromRGBO(40, 44, 52, 1);
   // 卡片背景色
   static Color get cardBackground => const Color.fromRGBO(25, 28, 35, 1);
+  // 皇家蓝 - 用于按钮和强调色
+  static Color get royalBlue => const Color.fromRGBO(65, 105, 225, 1);
+  // 深灰色 - 用于容器背景
+  static Color get ebonyClay => const Color.fromRGBO(40, 44, 52, 1);
 }

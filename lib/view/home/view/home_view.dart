@@ -8,6 +8,7 @@ import 'package:tradingview_app/core/component/list/category_asset_list.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
 import 'package:tradingview_app/view/home/model/crypto.dart';
 import 'package:tradingview_app/view/home/view/add_asset_page.dart';
+import 'package:tradingview_app/view/home/view/test_tushare_page.dart';
 import 'package:tradingview_app/view/home/view-model/cubit/crypto_cubit.dart';
 import 'package:tradingview_app/view/home/view-model/cubit/crypto_state.dart';
 
@@ -28,6 +29,24 @@ class _HomeViewState extends State<HomeView> {
       appBar: CustomAppBar(
         title: 'TradingView',
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TestTusharePage(),
+                  ),
+                );
+              },
+              child: const Icon(
+                Icons.api,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: GestureDetector(

@@ -1,4 +1,7 @@
 import 'package:tradingview_app/view/home/model/crypto.dart';
+import 'package:tradingview_app/view/home/model/forex.dart';
+import 'package:tradingview_app/view/home/model/stock.dart';
+import 'package:tradingview_app/view/home/model/commodity.dart';
 
 enum AssetCategory {
   forex('外汇', 'forex'),
@@ -89,6 +92,57 @@ class AssetItem {
       changePercent: changePercent,
       iconUrl: iconUrl,
       category: AssetCategory.stock,
+    );
+  }
+
+  factory AssetItem.fromForex(Forex forex) {
+    final price = (forex.currentPrice ?? 0.0).toDouble();
+    final changePercent = (forex.changePercent ?? 0.0).toDouble();
+    final change = (forex.change ?? 0.0).toDouble();
+    
+    return AssetItem(
+      symbol: forex.symbol?.toUpperCase() ?? '',
+      name: forex.name ?? '',
+      subtitle: '${forex.baseCurrency}/${forex.quoteCurrency}',
+      currentPrice: price,
+      change: change,
+      changePercent: changePercent,
+      iconUrl: '', // 外汇通常没有图标
+      category: AssetCategory.forex,
+    );
+  }
+
+  factory AssetItem.fromStock(Stock stock) {
+    final price = (stock.currentPrice ?? 0.0).toDouble();
+    final changePercent = (stock.changePercent ?? 0.0).toDouble();
+    final change = (stock.change ?? 0.0).toDouble();
+    
+    return AssetItem(
+      symbol: stock.symbol?.toUpperCase() ?? '',
+      name: stock.name ?? '',
+      subtitle: '${stock.exchange} - ${stock.sector}',
+      currentPrice: price,
+      change: change,
+      changePercent: changePercent,
+      iconUrl: '', // 股票图标需要单独处理
+      category: AssetCategory.stock,
+    );
+  }
+
+  factory AssetItem.fromCommodity(Commodity commodity) {
+    final price = (commodity.currentPrice ?? 0.0).toDouble();
+    final changePercent = (commodity.changePercent ?? 0.0).toDouble();
+    final change = (commodity.change ?? 0.0).toDouble();
+    
+    return AssetItem(
+      symbol: commodity.symbol?.toUpperCase() ?? '',
+      name: commodity.name ?? '',
+      subtitle: '${commodity.category} - ${commodity.unit}',
+      currentPrice: price,
+      change: change,
+      changePercent: changePercent,
+      iconUrl: '', // 商品图标需要单独处理
+      category: AssetCategory.commodity,
     );
   }
 }
