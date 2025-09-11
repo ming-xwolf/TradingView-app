@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:tradingview_app/view/home/model/stock.dart';
 import 'package:tradingview_app/view/home/service/stock/istock_data_source.dart';
 
@@ -674,6 +675,243 @@ class AkshareStockDataSource extends IStockDataSource {
       return '中小板';
     }
     return '主板';
+  }
+
+  // 获取分时数据（分钟级K线）
+  Future<List<CandlestickSpot>> fetchIntradayData(String symbol) async {
+    try {
+      print('Fetching intraday data for $symbol');
+      
+      // 使用东方财富历史分时数据API（trends2）
+      final response = await dio.get(
+        'https://push2his.eastmoney.com/api/qt/stock/trends2/get',
+        queryParameters: {
+          'secid': _getSecId(symbol),
+          'ut': 'bd1d9ddb0408970cf38c7f7fda6ba90b',
+          'fields1': 'f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13',
+          'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58',
+          'iscr': '0', // 复权处理
+          'ndays': '1', // 当日
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null && data['data'] != null) {
+          final trendsData = data['data'];
+          final trends = trendsData['trends'];
+          
+          if (trends is List) {
+            List<CandlestickSpot> spots = [];
+
+            for (int i = 0; i < trends.length; i++) {
+              final trend = trends[i];
+              // 统一当作字符串解析："时间,价格,均价,成交量,成交额,...."
+              final parts = trend.toString().split(',');
+              if (parts.length >= 2) {
+                final price = double.tryParse(parts[1]) ?? 0.0;
+                spots.add(CandlestickSpot(
+                  x: i.toDouble(),
+                  open: price,
+                  high: price,
+                  low: price,
+                  close: price,
+                ));
+              }
+            }
+            
+            print('Fetched ${spots.length} intraday data points for $symbol');
+            return spots;
+          }
+        }
+      }
+      
+      print('No intraday data found for $symbol');
+      return [];
+    } catch (e) {
+      print('Error fetching intraday data for $symbol: $e');
+      return [];
+    }
+  }
+
+  // 获取日线数据
+  Future<List<CandlestickSpot>> fetchDailyData(String symbol, int days) async {
+    try {
+      print('Fetching daily data for $symbol, days: $days');
+      
+      // 使用东方财富的K线数据API
+      final response = await dio.get(
+        'https://push2.eastmoney.com/api/qt/stock/kline/get',
+        queryParameters: {
+          'secid': _getSecId(symbol),
+          'ut': 'bd1d9ddb0408970cf38c7f7fda6ba90b',
+          'fields1': 'f1,f2,f3,f4,f5,f6',
+          'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58',
+          'klt': '101', // 日K线
+          'fqt': '1',
+          // 直接按数量获取
+          'lmt': days.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null && data['data'] != null) {
+          final klineData = data['data'];
+          final klines = klineData['klines'];
+          
+          if (klines is List) {
+            List<CandlestickSpot> spots = [];
+
+            for (int i = 0; i < klines.length; i++) {
+              final kline = klines[i];
+              final parts = kline.toString().split(',');
+              if (parts.length >= 5) {
+                final open = double.tryParse(parts[1]) ?? 0.0;
+                final close = double.tryParse(parts[2]) ?? 0.0;
+                final high = double.tryParse(parts[3]) ?? 0.0;
+                final low = double.tryParse(parts[4]) ?? 0.0;
+
+                spots.add(CandlestickSpot(
+                  x: i.toDouble(),
+                  open: open,
+                  high: high,
+                  low: low,
+                  close: close,
+                ));
+              }
+            }
+            // 不足lmt时直接返回
+            print('Fetched ${spots.length} daily data points for $symbol');
+            return spots;
+          }
+        }
+      }
+      
+      print('No daily data found for $symbol');
+      return [];
+    } catch (e) {
+      print('Error fetching daily data for $symbol: $e');
+      return [];
+    }
+  }
+
+  // 获取周线数据
+  Future<List<CandlestickSpot>> fetchWeeklyData(String symbol, int weeks) async {
+    try {
+      print('Fetching weekly data for $symbol, weeks: $weeks');
+      
+      final response = await dio.get(
+        'https://push2.eastmoney.com/api/qt/stock/kline/get',
+        queryParameters: {
+          'secid': _getSecId(symbol),
+          'ut': 'bd1d9ddb0408970cf38c7f7fda6ba90b',
+          'fields1': 'f1,f2,f3,f4,f5,f6',
+          'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58',
+          'klt': '102', // 周K线
+          'fqt': '1',
+          'lmt': weeks.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null && data['data'] != null) {
+          final klineData = data['data'];
+          final klines = klineData['klines'];
+          
+          if (klines is List) {
+            List<CandlestickSpot> spots = [];
+
+            for (int i = 0; i < klines.length; i++) {
+              final kline = klines[i];
+              final parts = kline.toString().split(',');
+              if (parts.length >= 5) {
+                final open = double.tryParse(parts[1]) ?? 0.0;
+                final close = double.tryParse(parts[2]) ?? 0.0;
+                final high = double.tryParse(parts[3]) ?? 0.0;
+                final low = double.tryParse(parts[4]) ?? 0.0;
+
+                spots.add(CandlestickSpot(
+                  x: i.toDouble(),
+                  open: open,
+                  high: high,
+                  low: low,
+                  close: close,
+                ));
+              }
+            }
+            print('Fetched ${spots.length} weekly data points for $symbol');
+            return spots;
+          }
+        }
+      }
+      
+      print('No weekly data found for $symbol');
+      return [];
+    } catch (e) {
+      print('Error fetching weekly data for $symbol: $e');
+      return [];
+    }
+  }
+
+  // 获取月线数据
+  Future<List<CandlestickSpot>> fetchMonthlyData(String symbol, int months) async {
+    try {
+      print('Fetching monthly data for $symbol, months: $months');
+      
+      final response = await dio.get(
+        'https://push2.eastmoney.com/api/qt/stock/kline/get',
+        queryParameters: {
+          'secid': _getSecId(symbol),
+          'ut': 'bd1d9ddb0408970cf38c7f7fda6ba90b',
+          'fields1': 'f1,f2,f3,f4,f5,f6',
+          'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58',
+          'klt': '103', // 月K线
+          'fqt': '1',
+          'lmt': months.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null && data['data'] != null) {
+          final klineData = data['data'];
+          final klines = klineData['klines'];
+          
+          if (klines is List) {
+            List<CandlestickSpot> spots = [];
+
+            for (int i = 0; i < klines.length; i++) {
+              final kline = klines[i];
+              final parts = kline.toString().split(',');
+              if (parts.length >= 5) {
+                final open = double.tryParse(parts[1]) ?? 0.0;
+                final close = double.tryParse(parts[2]) ?? 0.0;
+                final high = double.tryParse(parts[3]) ?? 0.0;
+                final low = double.tryParse(parts[4]) ?? 0.0;
+
+                spots.add(CandlestickSpot(
+                  x: i.toDouble(),
+                  open: open,
+                  high: high,
+                  low: low,
+                  close: close,
+                ));
+              }
+            }
+            print('Fetched ${spots.length} monthly data points for $symbol');
+            return spots;
+          }
+        }
+      }
+      
+      print('No monthly data found for $symbol');
+      return [];
+    } catch (e) {
+      print('Error fetching monthly data for $symbol: $e');
+      return [];
+    }
   }
 
 }

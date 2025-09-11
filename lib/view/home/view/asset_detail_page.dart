@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/component/chart/tradingview_chart_widget.dart';
 import 'package:tradingview_app/core/component/chart/enhanced_tradingview_chart_widget.dart';
+import 'package:tradingview_app/core/component/chart/fallback_chart_widget.dart';
+import 'package:tradingview_app/core/component/chart/akshare_chart_widget.dart';
+import 'package:tradingview_app/core/component/chart/candlestick_chart_widget.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
 
 class AssetDetailPage extends StatefulWidget {
@@ -291,6 +294,15 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
       return _buildUnsupportedIntervalMessage();
     }
     
+    // 如果是股票类别，使用美观的K线图表组件
+    if (widget.asset.category == AssetCategory.stock) {
+      return CandlestickChartWidget(
+        symbol: widget.asset.symbol,
+        height: 300,
+      );
+    }
+    
+    // 其他资产类别使用原有逻辑
     return EnhancedTradingViewChartWidget(
       symbol: widget.asset.symbol,
       timeframe: _selectedInterval,

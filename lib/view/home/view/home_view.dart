@@ -6,6 +6,12 @@ import 'package:tradingview_app/core/component/list/category_asset_list.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
 import 'package:tradingview_app/view/home/view/add_asset_page.dart';
 import 'package:tradingview_app/view/home/view/test_tushare_page.dart';
+import 'package:tradingview_app/view/home/service/asset_data_manager.dart';
+import 'package:tradingview_app/view/home/service/get-it/get_it_source.dart';
+import 'package:tradingview_app/view/home/service/forex/forex_data_source_with_dio.dart';
+import 'package:tradingview_app/view/home/service/stock/stock_data_source_selector.dart';
+import 'package:tradingview_app/view/home/service/commodity/commodity_data_source_with_dio.dart';
+import 'package:tradingview_app/view/home/service/watchlist_service.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -16,6 +22,89 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   int _currentIndex = 0;
+  late AssetDataManager _assetDataManager;
+  late WatchlistService _watchlistService;
+  List<AssetItem> _stockAssets = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDataManager();
+    _loadStockData();
+  }
+
+  void _initializeDataManager() {
+    // 初始化资产管理器
+    _assetDataManager = AssetDataManager(
+      forexDataSource: GetItSource.getIt.get<ForexDataSourceWithDio>(),
+      stockDataSource: GetItSource.getIt.get<StockDataSourceSelector>(),
+      commodityDataSource: GetItSource.getIt.get<CommodityDataSourceWithDio>(),
+    );
+    
+    // 初始化自选列表服务
+    _watchlistService = GetItSource.getIt.get<WatchlistService>();
+  }
+
+  Future<void> _loadStockData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 从自选列表获取股票数据
+      final watchlist = await _watchlistService.getWatchlist();
+      final stockAssets = watchlist.where((asset) => asset.category == AssetCategory.stock).toList();
+      
+      setState(() {
+        _stockAssets = stockAssets;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading stock data: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _removeFromWatchlist(AssetItem asset) async {
+    try {
+      final success = await _watchlistService.removeFromWatchlist(asset);
+      
+      if (success) {
+        // 重新加载数据
+        await _loadStockData();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('已从自选列表删除 ${asset.name}'),
+              backgroundColor: ProjectColors.jungleGreen,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('删除失败'),
+              backgroundColor: ProjectColors.cabaret,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('删除失败: $e'),
+            backgroundColor: ProjectColors.cabaret,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,19 +204,6 @@ class _HomeViewState extends State<HomeView> {
       ),
     ];
 
-    // 创建示例股票数据
-    final stockAssets = [
-      AssetItem.stock(
-        symbol: '000661',
-        name: '000661 D',
-        subtitle: '长春高新',
-        currentPrice: 124.33,
-        change: -3.16,
-        changePercent: -2.48,
-        iconUrl: '',
-      ),
-    ];
-
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -135,11 +211,20 @@ class _HomeViewState extends State<HomeView> {
             category: AssetCategory.forex,
             assets: forexAssets,
           ),
-          CategoryAssetList(
-            category: AssetCategory.stock,
-            assets: stockAssets,
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            )
+          else
+            CategoryAssetList(
+              category: AssetCategory.stock,
+              assets: _stockAssets,
+              onRemoveAsset: _removeFromWatchlist,
+            ),
+          AddAssetButton(
+            onAssetAdded: _loadStockData,
           ),
-          const AddAssetButton(),
         ],
       ),
     );

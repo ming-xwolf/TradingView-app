@@ -34,6 +34,9 @@ dependencies:
   # local storage
   shared_preferences: ^2.2.2
 
+  # charts
+  fl_chart: ^1.1.0
+
 dev_dependencies:
   # linter
   flutter_lints: ^2.0.0

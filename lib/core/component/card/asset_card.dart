@@ -7,10 +7,12 @@ import 'package:tradingview_app/view/home/view/asset_detail_page.dart';
 class AssetCard extends StatelessWidget {
   const AssetCard({
     required this.asset,
+    this.onRemove,
     super.key,
   });
 
   final AssetItem asset;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +102,18 @@ class AssetCard extends StatelessWidget {
               ),
             ],
           ),
+          // 删除按钮
+          if (onRemove != null) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => _showDeleteDialog(context),
+              child: Icon(
+                Icons.delete_outline,
+                color: ProjectColors.cabaret,
+                size: 20,
+              ),
+            ),
+          ],
         ],
       ),
       ),
@@ -122,5 +136,43 @@ class AssetCard extends StatelessWidget {
 
   String _formatChange(double change) {
     return change.abs().toStringAsFixed(2);
+  }
+
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: ProjectColors.cardBackground,
+          title: const Text(
+            '确认删除',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            '确定要从自选列表中删除 ${asset.name} 吗？',
+            style: TextStyle(color: ProjectColors.manatee),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                '取消',
+                style: TextStyle(color: ProjectColors.manatee),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onRemove?.call();
+              },
+              child: Text(
+                '删除',
+                style: TextStyle(color: ProjectColors.cabaret),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

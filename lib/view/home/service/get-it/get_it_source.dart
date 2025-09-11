@@ -6,6 +6,7 @@ import 'package:tradingview_app/view/home/service/stock/tushare_stock_data_sourc
 import 'package:tradingview_app/view/home/service/stock/akshare_stock_data_source.dart';
 import 'package:tradingview_app/view/home/service/stock/stock_data_source_selector.dart';
 import 'package:tradingview_app/view/home/service/commodity/commodity_data_source_with_dio.dart';
+import 'package:tradingview_app/view/home/service/watchlist_service.dart';
 
 class GetItSource {
   factory GetItSource() {
@@ -39,5 +40,8 @@ class GetItSource {
     
     // 注册商品数据源
     getIt.registerSingleton<CommodityDataSourceWithDio>(CommodityDataSourceWithDio(dio: dio));
+    
+    // 注册自选列表服务
+    getIt.registerSingleton<WatchlistService>(WatchlistService());
   }
 }

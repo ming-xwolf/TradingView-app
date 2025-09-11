@@ -6,10 +6,13 @@ import 'package:tradingview_app/core/component/icon/asset_icon.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
 import 'package:tradingview_app/view/home/service/stock/stock_data_source_selector.dart';
 import 'package:tradingview_app/view/home/service/asset_data_manager.dart';
+import 'package:tradingview_app/view/home/service/watchlist_service.dart';
 import 'package:tradingview_app/view/home/widget/datasource_selector_dialog.dart';
 
 class AddAssetPage extends StatefulWidget {
-  const AddAssetPage({super.key});
+  const AddAssetPage({this.onAssetAdded, super.key});
+  
+  final VoidCallback? onAssetAdded;
 
   @override
   State<AddAssetPage> createState() => _AddAssetPageState();
@@ -22,11 +25,13 @@ class _AddAssetPageState extends State<AddAssetPage> {
   List<AssetItem> _availableAssets = [];
   bool _isLoading = false;
   late StockDataSourceSelector _stockDataSource;
+  late WatchlistService _watchlistService;
 
   @override
   void initState() {
     super.initState();
     _stockDataSource = GetIt.instance<StockDataSourceSelector>();
+    _watchlistService = GetIt.instance<WatchlistService>();
     _loadInitialData();
   }
 
@@ -407,15 +412,8 @@ class _AddAssetPageState extends State<AddAssetPage> {
                                 ),
                               ],
                             ),
-                            onTap: () {
-                              // TODO: 添加到自选列表
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('已添加 ${asset.name} 到自选列表'),
-                                  backgroundColor: ProjectColors.jungleGreen,
-                                ),
-                              );
+                            onTap: () async {
+                              await _addToWatchlist(asset);
                             },
                           );
                         },
@@ -424,6 +422,44 @@ class _AddAssetPageState extends State<AddAssetPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _addToWatchlist(AssetItem asset) async {
+    try {
+      final success = await _watchlistService.addToWatchlist(asset);
+      
+      if (success) {
+        if (mounted) {
+          // 通知父页面刷新数据
+          widget.onAssetAdded?.call();
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('已添加 ${asset.name} 到自选列表'),
+              backgroundColor: ProjectColors.jungleGreen,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${asset.name} 已在自选列表中'),
+              backgroundColor: ProjectColors.manatee,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('添加失败: $e'),
+            backgroundColor: ProjectColors.cabaret,
+          ),
+        );
+      }
+    }
   }
 
   String _formatPrice(double price) {

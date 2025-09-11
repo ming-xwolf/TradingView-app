@@ -3,16 +3,19 @@ import 'package:tradingview_app/core/constants/color/color_constant.dart';
 import 'package:tradingview_app/core/component/card/asset_card.dart';
 import 'package:tradingview_app/view/home/model/asset_category.dart';
 import 'package:tradingview_app/view/home/view/add_asset_page.dart';
+import 'package:tradingview_app/view/home/service/watchlist_service.dart';
 
 class CategoryAssetList extends StatelessWidget {
   const CategoryAssetList({
     required this.category,
     required this.assets,
+    this.onRemoveAsset,
     super.key,
   });
 
   final AssetCategory category;
   final List<AssetItem> assets;
+  final Function(AssetItem)? onRemoveAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,10 @@ class CategoryAssetList extends StatelessWidget {
           ),
         ),
         // 资产列表
-        ...assets.map((asset) => AssetCard(asset: asset)),
+        ...assets.map((asset) => AssetCard(
+          asset: asset,
+          onRemove: onRemoveAsset != null ? () => onRemoveAsset!(asset) : null,
+        )),
         const SizedBox(height: 8),
       ],
     );
@@ -42,7 +48,9 @@ class CategoryAssetList extends StatelessWidget {
 }
 
 class AddAssetButton extends StatelessWidget {
-  const AddAssetButton({super.key});
+  const AddAssetButton({this.onAssetAdded, super.key});
+  
+  final VoidCallback? onAssetAdded;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +61,9 @@ class AddAssetButton extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AddAssetPage(),
+              builder: (context) => AddAssetPage(
+                onAssetAdded: onAssetAdded,
+              ),
             ),
           );
         },

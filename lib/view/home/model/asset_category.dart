@@ -127,5 +127,36 @@ class AssetItem {
       category: AssetCategory.commodity,
     );
   }
+
+  /// 转换为JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'symbol': symbol,
+      'name': name,
+      'subtitle': subtitle,
+      'currentPrice': currentPrice,
+      'change': change,
+      'changePercent': changePercent,
+      'iconUrl': iconUrl,
+      'category': category.value,
+    };
+  }
+
+  /// 从JSON创建
+  factory AssetItem.fromJson(Map<String, dynamic> json) {
+    return AssetItem(
+      symbol: json['symbol'] ?? '',
+      name: json['name'] ?? '',
+      subtitle: json['subtitle'] ?? '',
+      currentPrice: (json['currentPrice'] ?? 0.0).toDouble(),
+      change: (json['change'] ?? 0.0).toDouble(),
+      changePercent: (json['changePercent'] ?? 0.0).toDouble(),
+      iconUrl: json['iconUrl'] ?? '',
+      category: AssetCategory.values.firstWhere(
+        (cat) => cat.value == json['category'],
+        orElse: () => AssetCategory.stock,
+      ),
+    );
+  }
 }
 
