@@ -757,8 +757,17 @@ class AkshareStockDataSource extends IStockDataSource {
       if (response.statusCode == 200) {
         print('Daily data response: ${response.data}');
         final data = response.data;
-        if (data != null && data['data'] != null) {
-          final klineData = data['data'];
+        if (data == null) {
+          return [];
+        }
+        // rc != 0 或 data 为空直接返回
+        final rc = data is Map<String, dynamic> ? data['rc'] : null;
+        if (rc != null && rc != 0) {
+          print('Daily data rc=$rc, returning empty');
+          return [];
+        }
+        if (data != null && data['data'] != null && data['data'] is Map) {
+          final klineData = data['data'] as Map;
           final klines = klineData['klines'];
           print('Daily klines type: ${klines.runtimeType}');
           if (klines is! List) {
@@ -843,8 +852,16 @@ class AkshareStockDataSource extends IStockDataSource {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data != null && data['data'] != null) {
-          final klineData = data['data'];
+        if (data == null) {
+          return [];
+        }
+        final rc = data is Map<String, dynamic> ? data['rc'] : null;
+        if (rc != null && rc != 0) {
+          print('Weekly data rc=$rc, returning empty');
+          return [];
+        }
+        if (data != null && data['data'] != null && data['data'] is Map) {
+          final klineData = data['data'] as Map;
           final klines = klineData['klines'];
           print('Weekly klines type: ${klines.runtimeType}');
           if (klines is! List) {
@@ -928,8 +945,16 @@ class AkshareStockDataSource extends IStockDataSource {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data != null && data['data'] != null) {
-          final klineData = data['data'];
+        if (data == null) {
+          return [];
+        }
+        final rc = data is Map<String, dynamic> ? data['rc'] : null;
+        if (rc != null && rc != 0) {
+          print('Monthly data rc=$rc, returning empty');
+          return [];
+        }
+        if (data != null && data['data'] != null && data['data'] is Map) {
+          final klineData = data['data'] as Map;
           final klines = klineData['klines'];
           print('Monthly klines type: ${klines.runtimeType}');
           if (klines is! List) {
