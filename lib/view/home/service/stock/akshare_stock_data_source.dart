@@ -832,7 +832,11 @@ class AkshareStockDataSource extends IStockDataSource {
         final map = resp2.data as Map;
         final data = map['data'];
         if (data is Map && data['klines'] is List) {
-          return (data['klines'] as List).cast<dynamic>();
+          final list = (data['klines'] as List).cast<dynamic>();
+          if (list.length > limit) {
+            return list.sublist(list.length - limit);
+          }
+          return list;
         }
       }
     } catch (e) {
